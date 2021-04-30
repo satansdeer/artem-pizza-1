@@ -1,0 +1,9 @@
+.TotalOrder__splitter {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    vertical-align: middle;
+    background-color: #aaa;
+    border-radius: 50%;
+    margin: 0 5px;
+}

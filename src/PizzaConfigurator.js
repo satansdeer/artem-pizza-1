@@ -1,22 +1,32 @@
-import useState from "react";
+import { useState, useEffect } from "react";
 import calculatePrice from "./utils/calculatePrice";
 import getTopping from "./utils/getTopping";
+import Fieldset from "./Fieldset";
+import TotalOrder from "./TotalOrder";
+
+import {
+  PIZZA_SIZE,
+  PIZZA_CRUST,
+  PIZZA_SAUCE,
+  PIZZA_CHEESE,
+  PIZZA_VEGES,
+  PIZZA_MEAT,
+} from "./data";
 
 export default function PizzaConfigurator() {
-  const [size, setSize] = useState(30);
-  const [crust, setCrust] = useState("thin");
-  const [sauce, setSauce] = useState("tomato");
-  const [cheese, setCheese] = useState([]);
+  const [size, setSize] = useState(PIZZA_SIZE.DEFAULT);
+  const [crust, setCrust] = useState(PIZZA_CRUST.THIN);
+  const [sauce, setSauce] = useState(PIZZA_SAUCE.TOMATO);
+  const [cheese, setCheese] = useState([PIZZA_CHEESE.MOZZARELLA]);
   const [veges, setVeges] = useState([]);
   const [meat, setMeat] = useState([]);
-  const [orderItems, setOrderItems] = useState([]);
-
-  const totalPrice = calculatePrice({
-    size,
-    cheese,
-    veges,
-    meat,
-  });
+  const [totalPrice, setTotalPrice] = useState(
+    calculatePrice(size, cheese, veges, meat)
+  );
+  const [order, setOrder] = useState({});
+  useEffect(() => {
+    setTotalPrice(calculatePrice(size, cheese, veges, meat));
+  }, [size, crust, sauce, cheese, veges, meat]);
 
   function selectSize(evt) {
     const value = Number.parseInt(evt.target.value);
@@ -43,245 +53,118 @@ export default function PizzaConfigurator() {
   }
 
   function resetConfigurator() {
-    setSize(30);
-    setCrust("thin");
-    setSauce("tomato");
-    setCheese([]);
+    setSize(PIZZA_SIZE.DEFAULT);
+    setCrust(PIZZA_CRUST.THIN);
+    setSauce(PIZZA_SAUCE.TOMATO);
+    setCheese([PIZZA_CHEESE.MOZZARELLA]);
     setVeges([]);
     setMeat([]);
   }
 
   function showOrder(evt) {
     evt.preventDefault();
-    const order = cheese.concat(veges, meat);
-    setOrderItems(order);
+    const order = {
+      size: size,
+      crust: crust,
+      sauce: sauce,
+      cheese: cheese,
+      veges: veges,
+      meat: meat,
+      totalPrice: totalPrice,
+    };
+    setOrder(order);
     resetConfigurator();
   }
+
+  const sizeList = Object.values(PIZZA_SIZE).map((value) => ({
+    value,
+    title: value + " cm",
+    checked: size === value,
+  }));
+
+  const crustList = Object.values(PIZZA_CRUST).map((value) => ({
+    value,
+    title: value,
+    checked: crust === value,
+  }));
+
+  const sauceList = Object.values(PIZZA_SAUCE).map((value) => ({
+    value,
+    title: value.split(" ")[0],
+    checked: sauce === value,
+  }));
+
+  const cheeseList = Object.values(PIZZA_CHEESE).map((value) => ({
+    value,
+    title: value,
+    checked: cheese.includes(value),
+  }));
+
+  const vegesList = Object.values(PIZZA_VEGES).map((value) => ({
+    value,
+    title: value,
+    checked: veges.includes(value),
+  }));
+
+  const meatList = Object.values(PIZZA_MEAT).map((value) => ({
+    value,
+    title: value,
+    checked: meat.includes(value),
+  }));
 
   return (
     <>
       <form className="pizza-configurator" onSubmit={showOrder}>
         <div className="configurator-wrapper">
-          <div className="configurator-block">
-            <span>Size</span>
-            <label htmlFor="size-30">
-              <input
-                onChange={selectSize}
-                type="radio"
-                name="size"
-                value={30}
-                checked={size === 30}
-                data-testid="size-30"
-                id="size-30"
-              />
-              30 cm
-            </label>
-            <label htmlFor="size-35">
-              <input
-                onChange={selectSize}
-                type="radio"
-                name="size"
-                value={35}
-                checked={size === 35}
-                data-testid="size-35"
-                id="size-35"
-              />
-              35 cm
-            </label>
-          </div>
-
-          <div className="configurator-block">
-            <span>Crust</span>
-            <label htmlFor="thin-crust">
-              <input
-                onChange={selectCrust}
-                type="radio"
-                name="crust"
-                value="thin"
-                data-testid="thin-crust"
-                checked={crust === "thin-crust"}
-                id="thin-crust"
-              />
-              Thin
-            </label>
-            <label htmlFor="thick-crust">
-              <input
-                onChange={selectCrust}
-                type="radio"
-                name="crust"
-                value="thick"
-                data-testid="thick-crust"
-                checked={crust === "thick-crust"}
-                id="thick-crust"
-              />
-              Thick
-            </label>
-          </div>
+          <Fieldset
+            title="Size"
+            name="size"
+            type="radio"
+            handlerChange={selectSize}
+            list={sizeList}
+          />
+          <Fieldset
+            title="Crust"
+            name="crust"
+            type="radio"
+            handlerChange={selectCrust}
+            list={crustList}
+          />
         </div>
+        <Fieldset
+          title="Choose sauce"
+          name="sauce"
+          type="radio"
+          handlerChange={selectSauce}
+          list={sauceList}
+        />
 
-        <div className="configurator-block">
-          <span>Choose sauce</span>
-          <label htmlFor="tomato-sauce">
-            <input
-              onChange={selectSauce}
-              type="radio"
-              name="sauce"
-              value="tomato-sauce"
-              data-testid="tomato-sauce"
-              checked={sauce === "tomato-sauce"}
-              id="tomato-sauce"
-            />
-            Tomato
-          </label>
-          <label htmlFor="white-sauce">
-            <input
-              onChange={selectSauce}
-              type="radio"
-              name="sauce"
-              value="white-sauce"
-              data-testid="white-sauce"
-              checked={sauce === "white-sauce"}
-              id="white-sauce"
-            />
-            White
-          </label>
-          <label htmlFor="hot-sauce">
-            <input
-              onChange={selectSauce}
-              type="radio"
-              name="sauce"
-              value="hot-sauce"
-              data-testid="hot-sauce"
-              checked={sauce === "hot-sauce"}
-              id="hot-sauce"
-            />
-            Hot
-          </label>
-        </div>
+        <Fieldset
+          title="Choose cheese"
+          name="cheese"
+          handlerChange={selectCheese}
+          list={cheeseList}
+        />
 
-        <div className="configurator-block">
-          <span>Choose cheese</span>
-          <label htmlFor="mozzarella-cheese">
-            <input
-              onChange={selectCheese}
-              type="checkbox"
-              name="cheese"
-              value="mozzarella"
-              data-testid="mozzarella-cheese"
-              checked={cheese === "mozzarella-cheese"}
-              id="mozzarella-cheese"
-            />
-            Mozzarella
-          </label>
-          <label htmlFor="cheddar-cheese">
-            <input
-              onChange={selectCheese}
-              type="checkbox"
-              name="cheese"
-              value="cheddar"
-              data-testid="cheddar-cheese"
-              checked={cheese === "cheddar-cheese"}
-              id="cheddar-cheese"
-            />
-            Cheddar
-          </label>
-          <label htmlFor="dorblu-cheese">
-            <input
-              onChange={selectCheese}
-              type="checkbox"
-              name="cheese"
-              value="dorblu"
-              data-testid="dorblu-cheese"
-              checked={cheese === "dorblu-cheese"}
-              id="dorblue-cheese"
-            />
-            Dorblue
-          </label>
-        </div>
+        <Fieldset
+          title="Choose veges"
+          name="veges"
+          handlerChange={selectVeges}
+          list={vegesList}
+        />
 
-        <div className="configurator-block">
-          <span>Choose veges</span>
-          <label htmlFor="veges-tomatoes">
-            <input
-              onChange={selectVeges}
-              type="checkbox"
-              name="veges"
-              value="tomatoes"
-              data-testid="veges-tomatoes"
-              checked={veges === "veges-tomatoes"}
-              id="veges-tomatoes"
-            />
-            Tomatoes
-          </label>
-          <label htmlFor="veges-mushrooms">
-            <input
-              onChange={selectVeges}
-              type="checkbox"
-              name="veges"
-              value="mushrooms"
-              data-testid="veges-mushrooms"
-              checked={veges === "veges-mushrooms"}
-              id="veges-mushrooms"
-            />
-            Mushrooms
-          </label>
-          <label htmlFor="veges-cupsicum">
-            <input
-              onChange={selectVeges}
-              type="checkbox"
-              name="veges"
-              value="cupsicum"
-              data-testid="veges-cupsicum"
-              checked={veges === "veges-cupsicum"}
-              id="veges-cupsicum"
-            />
-            Cupsicum
-          </label>
-        </div>
+        <Fieldset
+          title="Choose meat"
+          name="meat"
+          handlerChange={selectMeat}
+          list={meatList}
+        />
 
-        <div className="configurator-block">
-          <span>Choose meat</span>
-          <label htmlFor="meat-bacon">
-            <input
-              onChange={selectMeat}
-              type="checkbox"
-              name="meat"
-              value="bacon"
-              data-testid="meat-bacon"
-              checked={meat === "meat-bacon"}
-              id="meat-bacon"
-            />
-            Bacon
-          </label>
-          <label htmlFor="meat-pepperoni">
-            <input
-              onChange={selectMeat}
-              type="checkbox"
-              name="meat"
-              value="pepperoni"
-              data-testid="meat-pepperoni"
-              checked={meat === "meat-pepperoni"}
-              id="meat-pepperoni"
-            />
-            Pepperoni
-          </label>
-          <label htmlFor="meat-ham">
-            <input
-              onChange={selectMeat}
-              type="checkbox"
-              name="meat"
-              value="ham"
-              data-testid="meat-ham"
-              checked={meat === "meat-ham"}
-              id="vmeat-ham"
-            />
-            Ham
-          </label>
-        </div>
-        <button type="submit">Make order</button>
+        <button type="submit">
+          Make order {order.totalPrice ? order.totalPrice : totalPrice}
+        </button>
       </form>
-      <p>Ingredients: {orderItems.join(", ")}</p>
-      <p>Total Price: {totalPrice}</p>
+      {order.totalPrice ? <TotalOrder order={order} /> : null}
     </>
   );
 }

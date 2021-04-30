@@ -1,20 +1,10 @@
-const DEFAULT_PRICE = 200;
-const PIZZA_SIZE_PRICE = 50;
-const INGREDIENT_PRICE = 29;
+import { PRICES, PIZZA_SIZE } from "../data";
 
-export default function calculatePrice({ size, cheese, veges, meat }) {
-  let price = DEFAULT_PRICE;
-  if (size === 35) {
-    price += PIZZA_SIZE_PRICE;
+export default function calculatePrice(size, cheese, veges, meat) {
+  let price = PRICES.DEFAULT;
+  if (size === PIZZA_SIZE.LARGE) {
+    price += PRICES.PIZZA_SIZE;
   }
-  cheese.forEach(() => {
-    price += INGREDIENT_PRICE;
-  });
-  veges.forEach(() => {
-    price += INGREDIENT_PRICE;
-  });
-  meat.forEach(() => {
-    price += INGREDIENT_PRICE;
-  });
+  price += (cheese.length + veges.length + meat.length) * PRICES.INGREDIENT;
   return price;
 }

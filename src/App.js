@@ -1,5 +1,5 @@
-import './App.css';
-import PizzaConfigurator from './PizzaConfigurator';
+import "./App.css";
+import PizzaConfigurator from "./PizzaConfigurator";
 
 function App() {
   return (
