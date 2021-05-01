@@ -5,8 +5,8 @@ const PRICES = {
 };
 
 const PIZZA_SIZE = {
-  DEFAULT: 30,
-  LARGE: 35,
+  DEFAULT: "30 cm",
+  LARGE: "35 cm",
 };
 
 const PIZZA_CRUST = {

@@ -1,4 +1,4 @@
-import { PRICES, PIZZA_SIZE } from "../data";
+import { PRICES, PIZZA_SIZE } from "../constants";
 
 export default function calculatePrice(size, cheese, veges, meat) {
   let price = PRICES.DEFAULT;

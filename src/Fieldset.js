@@ -8,21 +8,18 @@ export default function Fieldset({
   return (
     <fieldset className="configurator-block">
       <span>{title}</span>
-      {list.map((el) => {
-        let id = name + "-" + el.value;
-        id = id.split(" ").join("-");
+      {list.map(({checked, id, title}) => {
         return (
           <label htmlFor={id} key={id}>
             <input
               onChange={handlerChange}
               type={type}
               name={name}
-              value={el.value}
-              checked={el.checked}
-              data-testid={id}
+              value={id}
               id={id}
+              checked={checked}
             />
-            {el.title}
+            {title}
           </label>
         );
       })}

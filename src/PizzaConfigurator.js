@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import calculatePrice from "./utils/calculatePrice";
-import getTopping from "./utils/getTopping";
+import getUpdatedArray from "./utils/getUpdatedArray";
 import Fieldset from "./Fieldset";
-import TotalOrder from "./TotalOrder";
 
 import {
   PIZZA_SIZE,
@@ -11,45 +10,64 @@ import {
   PIZZA_CHEESE,
   PIZZA_VEGES,
   PIZZA_MEAT,
-} from "./data";
+} from "./constants";
 
-export default function PizzaConfigurator() {
+const getCheckboxIngredientsList = (ingredientsObject, ingredientsState) => {
+  return Object.entries(ingredientsObject).map(([id, title]) => ({
+    id,
+    title,
+    checked: ingredientsState.includes(id),
+  }));
+}
+
+const getRadioIngredientsList = (ingredientsObject, ingredientState) => {
+  return Object.entries(ingredientsObject).map(([id, title]) => ({
+    id,
+    title,
+    checked: ingredientState === id,
+  }));
+}
+
+export default function PizzaConfigurator({ onSubmit }) {
   const [size, setSize] = useState(PIZZA_SIZE.DEFAULT);
   const [crust, setCrust] = useState(PIZZA_CRUST.THIN);
   const [sauce, setSauce] = useState(PIZZA_SAUCE.TOMATO);
   const [cheese, setCheese] = useState([PIZZA_CHEESE.MOZZARELLA]);
   const [veges, setVeges] = useState([]);
   const [meat, setMeat] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(
-    calculatePrice(size, cheese, veges, meat)
-  );
-  const [order, setOrder] = useState({});
-  useEffect(() => {
-    setTotalPrice(calculatePrice(size, cheese, veges, meat));
-  }, [size, crust, sauce, cheese, veges, meat]);
 
-  function selectSize(evt) {
-    const value = Number.parseInt(evt.target.value);
+  const sizeList = getRadioIngredientsList(PIZZA_SIZE, size)
+  const crustList = getRadioIngredientsList(PIZZA_CRUST, crust)
+  const sauceList = getRadioIngredientsList(PIZZA_SAUCE, sauce)
+  const cheeseList = getCheckboxIngredientsList(PIZZA_CHEESE, cheese)
+  const vegesList = getCheckboxIngredientsList(PIZZA_VEGES, veges)
+  const meatList = getCheckboxIngredientsList(PIZZA_MEAT, meat)
+
+  const totalPrice = calculatePrice(size, cheese, veges, meat);
+
+  function selectSize(event) {
+    const value = Number.parseInt(event.target.value);
     setSize(value);
   }
 
-  function selectCrust(evt) {
-    setCrust(evt.target.value);
+  function selectCrust(event) {
+    setCrust(event.target.value);
   }
 
-  function selectSauce(evt) {
-    setSauce(evt.target.value);
+  function selectSauce(event) {
+    setSauce(event.target.value);
   }
 
-  function selectCheese(evt) {
-    setCheese(getTopping(cheese, evt.target.value));
+  function selectCheese(event) {
+    setCheese(getUpdatedArray(cheese, event.target.value));
   }
 
-  function selectVeges(evt) {
-    setVeges(getTopping(veges, evt.target.value));
+  function selectVeges(event) {
+    setVeges(getUpdatedArray(veges, event.target.value));
   }
-  function selectMeat(evt) {
-    setMeat(getTopping(meat, evt.target.value));
+
+  function selectMeat(event) {
+    setMeat(getUpdatedArray(meat, event.target.value));
   }
 
   function resetConfigurator() {
@@ -64,53 +82,17 @@ export default function PizzaConfigurator() {
   function showOrder(evt) {
     evt.preventDefault();
     const order = {
-      size: size,
-      crust: crust,
-      sauce: sauce,
-      cheese: cheese,
-      veges: veges,
-      meat: meat,
-      totalPrice: totalPrice,
+      size,
+      crust,
+      sauce,
+      cheese,
+      veges,
+      meat,
+      totalPrice,
     };
-    setOrder(order);
+    onSubmit(order);
     resetConfigurator();
   }
-
-  const sizeList = Object.values(PIZZA_SIZE).map((value) => ({
-    value,
-    title: value + " cm",
-    checked: size === value,
-  }));
-
-  const crustList = Object.values(PIZZA_CRUST).map((value) => ({
-    value,
-    title: value,
-    checked: crust === value,
-  }));
-
-  const sauceList = Object.values(PIZZA_SAUCE).map((value) => ({
-    value,
-    title: value.split(" ")[0],
-    checked: sauce === value,
-  }));
-
-  const cheeseList = Object.values(PIZZA_CHEESE).map((value) => ({
-    value,
-    title: value,
-    checked: cheese.includes(value),
-  }));
-
-  const vegesList = Object.values(PIZZA_VEGES).map((value) => ({
-    value,
-    title: value,
-    checked: veges.includes(value),
-  }));
-
-  const meatList = Object.values(PIZZA_MEAT).map((value) => ({
-    value,
-    title: value,
-    checked: meat.includes(value),
-  }));
 
   return (
     <>
@@ -160,11 +142,8 @@ export default function PizzaConfigurator() {
           list={meatList}
         />
 
-        <button type="submit">
-          Make order {order.totalPrice ? order.totalPrice : totalPrice}
-        </button>
+        <button type="submit">Make order {totalPrice}</button>
       </form>
-      {order.totalPrice ? <TotalOrder order={order} /> : null}
     </>
   );
 }
